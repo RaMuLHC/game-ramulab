@@ -50,7 +50,17 @@ export default function AboutTab({ info }: AboutTabProps) {
       return;
     }
 
-    const proxyUrl = (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    // 📌 由於 Steam 封鎖了 public proxy（如 allorigins），請在 Cloudflare 部署免費的個人代理並在此處貼上網址！
+    // 貼上後會使用你的個人代理，否則會繼續使用 allorigins (但會是 fetching 狀態)
+    const CLOUDFLARE_WORKER_PROXY = ""; // 例如 "https://my-steam-proxy.username.workers.dev/"
+
+    const proxyUrl = (url: string) => {
+      if (CLOUDFLARE_WORKER_PROXY) {
+        const separator = CLOUDFLARE_WORKER_PROXY.endsWith('/') ? '' : '/';
+        return `${CLOUDFLARE_WORKER_PROXY}${separator}?url=${encodeURIComponent(url)}`;
+      }
+      return `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    };
 
     setSteamData(prev => ({ ...prev, loading: true, error: false }));
 
