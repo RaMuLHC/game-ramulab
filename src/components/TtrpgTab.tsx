@@ -572,14 +572,18 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                       <span>冒險成員 // PARTY</span>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      {selectedLog.characters.map((char, idx) => (
-                        <div 
-                          key={idx} 
-                          className="bg-slate-900/40 border border-slate-850 p-0.5 px-1.5 rounded-md text-[9px] text-slate-350 font-sans"
-                        >
-                          {char}
-                        </div>
-                      ))}
+                      {Array.isArray(selectedLog.characters) ? (
+                        selectedLog.characters.map((char, idx) => (
+                          <div 
+                            key={idx} 
+                            className="bg-slate-900/40 border border-slate-850 p-0.5 px-1.5 rounded-md text-[9px] text-slate-350 font-sans"
+                          >
+                            {char}
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-slate-500 italic">無成員資料</span>
+                      )}
                     </div>
                   </div>
                 </div>

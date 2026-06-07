@@ -6,21 +6,42 @@ function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (match) {
     const yaml = match[1];
+    let currentKey = null;
     yaml.split('\n').forEach(line => {
-      const parts = line.split(':');
-      if (parts.length >= 2) {
-        const key = parts[0].trim();
-        let value = parts.slice(1).join(':').trim();
-        
-        // Remove quotes if present
-        if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
-        if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1);
-        
-        // Handle array syntax [item1, item2]
-        if (value.startsWith('[') && value.endsWith(']')) {
-          value = value.slice(1, -1).split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
+      const trimmed = line.trim();
+      if (trimmed.startsWith('-') && currentKey) {
+        // Multi-line list item
+        let val = trimmed.slice(1).trim();
+        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
+        if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
+        if (!Array.isArray(meta[currentKey])) {
+          meta[currentKey] = [];
         }
-        meta[key] = value;
+        meta[currentKey].push(val);
+      } else {
+        const parts = line.split(':');
+        if (parts.length >= 2) {
+          const key = parts[0].trim();
+          let value = parts.slice(1).join(':').trim();
+          
+          // Remove quotes if present
+          if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+          if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1);
+          
+          // Handle inline array syntax [item1, item2]
+          if (value.startsWith('[') && value.endsWith(']')) {
+            value = value.slice(1, -1).split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
+            meta[key] = value;
+            currentKey = null;
+          } else if (value === '') {
+            // Might be the start of a multi-line list
+            meta[key] = [];
+            currentKey = key;
+          } else {
+            meta[key] = value;
+            currentKey = null;
+          }
+        }
       }
     });
   }
