@@ -491,11 +491,11 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
               className="relative w-full max-w-5xl bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.25)] flex flex-col md:flex-row h-[85vh] max-h-[750px] overflow-hidden z-10"
             >
-                    {/* Sidebar: Meta specifications (full-width on mobile, md:width-72 on desktop) */}
-              <div className="w-full md:w-72 bg-slate-950/60 border-b md:border-b-0 md:border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0 overflow-y-auto max-h-[35vh] md:max-h-full">
-                <div className="space-y-5">
+              {/* Sidebar: Meta specifications (full-width on mobile, md:width-72 on desktop) */}
+              <div className="w-full md:w-72 bg-slate-950/60 border-b md:border-b-0 md:border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0 overflow-y-auto max-h-[35vh] md:max-h-full md:h-full">
+                <div className="space-y-5 flex flex-col md:flex-1 md:min-h-0">
                   {/* Campaign Theme Header */}
-                  <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-3 mt-1 shrink-0">
                     <span className="text-3xl select-none leading-none">{selectedLog.emoji || '📜'}</span>
                     <div>
                       <span className="text-[9px] font-mono font-bold tracking-widest text-purple-400 uppercase">Chronicle Archive</span>
@@ -504,12 +504,12 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                   </div>
 
                   {/* Chapter Navigation Index */}
-                  <div className="border-t border-slate-800/60 pt-4">
-                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                  <div className="border-t border-slate-800/60 pt-4 flex flex-col md:flex-1 md:min-h-0">
+                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2.5 flex items-center gap-1.5 shrink-0">
                       <Compass size={11} className="text-purple-400 shrink-0" />
                       <span>章節導覽 // INDEX</span>
                     </div>
-                    <div className="space-y-1 max-h-[22vh] md:max-h-[28vh] overflow-y-auto scrollbar-thin pr-1">
+                    <div className="space-y-1 max-h-[22vh] md:max-h-none md:flex-1 overflow-y-auto scrollbar-thin pr-1">
                       {getMarkdownHeadings(logMarkdownContent).map((h, index) => {
                         const isLevel1 = h.level === 1;
                         const isLevel2 = h.level === 2;
@@ -671,10 +671,10 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               </button>
 
               {/* Sidebar: Meta specifications (full-width on mobile, md:width-72 on desktop) */}
-              <div className="w-full md:w-72 bg-slate-950/60 border-b md:border-b-0 md:border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0 overflow-y-auto max-h-[35vh] md:max-h-full">
-                <div className="space-y-5">
+              <div className="w-full md:w-72 bg-slate-950/60 border-b md:border-b-0 md:border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0 overflow-y-auto max-h-[35vh] md:max-h-full md:h-full">
+                <div className="space-y-5 flex flex-col md:flex-1 md:min-h-0">
                   {/* Campaign Theme Header */}
-                  <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-3 mt-1 shrink-0">
                     <span className="text-3xl select-none leading-none">{selectedCampaign?.emoji || '🐉'}</span>
                     <div>
                       <span className="text-[9px] font-mono font-bold tracking-widest text-purple-400 uppercase">New Campaign Recruitment</span>
@@ -683,12 +683,12 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                   </div>
 
                   {/* Chapter Navigation Index */}
-                  <div className="border-t border-slate-800/60 pt-4">
-                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                  <div className="border-t border-slate-800/60 pt-4 flex flex-col md:flex-1 md:min-h-0">
+                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2.5 flex items-center gap-1.5 shrink-0">
                       <Compass size={11} className="text-purple-400 shrink-0" />
                       <span>章節導覽 // INDEX</span>
                     </div>
-                    <div className="space-y-1 max-h-[22vh] md:max-h-[28vh] overflow-y-auto scrollbar-thin pr-1">
+                    <div className="space-y-1 max-h-[22vh] md:max-h-none md:flex-1 overflow-y-auto scrollbar-thin pr-1">
                       {getMarkdownHeadings(recruitmentMarkdownContent).map((h, index) => {
                         const isLevel1 = h.level === 1;
                         const isLevel2 = h.level === 2;
