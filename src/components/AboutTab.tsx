@@ -52,7 +52,7 @@ export default function AboutTab({ info }: AboutTabProps) {
 
     // 📌 由於 Steam 封鎖了 public proxy（如 allorigins），請在 Cloudflare 部署免費的個人代理並在此處貼上網址！
     // 貼上後會使用你的個人代理，否則會繼續使用 allorigins (但會是 fetching 狀態)
-    const CLOUDFLARE_WORKER_PROXY = ""; // 例如 "https://my-steam-proxy.username.workers.dev/"
+    const CLOUDFLARE_WORKER_PROXY = "https://steam-proxy.wing-3616.workers.dev/";
 
     const proxyUrl = (url: string) => {
       if (CLOUDFLARE_WORKER_PROXY) {
