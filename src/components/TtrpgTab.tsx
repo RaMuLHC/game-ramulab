@@ -60,11 +60,47 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
   const [showRecruiting, setShowRecruiting] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('All');
 
+  // Dynamic TTRPG data from manifest
+  const [campaigns, setCampaigns] = useState<any[]>([
+    {
+      id: "neverwinter",
+      title: "龍與地下城 5e：絕冬城之影",
+      ruleset: "D&D 5e",
+      emoji: "🐉",
+      slots: "4 - 5 玩家",
+      schedule: "每週五 20:00 - 24:00",
+      platform: "Foundry VTT / Discord",
+      markdownFile: "/markdown/recruitment/neverwinter.md"
+    }
+  ]);
+  const [logs, setLogs] = useState<TtrpgLog[]>(TTRPG_LOGS);
+  const [selectedCampaign, setSelectedCampaign] = useState<any | null>(null);
+
   // Dynamic Markdown loading states
   const [logMarkdownContent, setLogMarkdownContent] = useState<string>('');
   const [recruitmentMarkdownContent, setRecruitmentMarkdownContent] = useState<string>('');
   const [isLoadingLog, setIsLoadingLog] = useState(false);
   const [isLoadingRecruitment, setIsLoadingRecruitment] = useState(false);
+
+  // Fetch manifest on mount
+  React.useEffect(() => {
+    fetch('/markdown/manifest.json')
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load manifest");
+        return res.json();
+      })
+      .then(data => {
+        if (data.recruitment && data.recruitment.length > 0) {
+          setCampaigns(data.recruitment);
+        }
+        if (data.log && data.log.length > 0) {
+          setLogs(data.log);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load TTRPG manifest:", err);
+      });
+  }, []);
 
   const handleCopyFvtt = () => {
     navigator.clipboard.writeText(info.fvttUrl);
@@ -92,11 +128,12 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
       });
   };
 
-  const handleOpenRecruiting = () => {
+  const handleOpenRecruiting = (camp: any) => {
+    setSelectedCampaign(camp);
     setShowRecruiting(true);
     setIsLoadingRecruitment(true);
     setRecruitmentMarkdownContent('');
-    fetch('/markdown/campaign-recruitment.md')
+    fetch(camp.markdownFile)
       .then(res => {
         if (!res.ok) throw new Error("Failed to load recruitment info");
         return res.text();
@@ -112,9 +149,12 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
       });
   };
 
-  const filteredLogs = activeFilter === 'All'
-    ? TTRPG_LOGS
-    : TTRPG_LOGS.filter(log => log.ruleset === activeFilter);
+  // Dynamically compute unique rulesets from logs
+  const availableRulesets = ['All', ...Array.from(new Set(logs.map(log => log.ruleset))).filter(Boolean)];
+
+  const filteredLogs = (activeFilter === 'All' || !availableRulesets.includes(activeFilter))
+    ? logs
+    : logs.filter(log => log.ruleset === activeFilter);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto relative">
@@ -214,32 +254,42 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               <span>新戰役招募 // New Campaign Recruitment</span>
             </h3>
             
-            <div 
-              onClick={handleOpenRecruiting}
-              className="group relative bg-slate-950/50 hover:bg-slate-950/80 border border-slate-850 hover:border-purple-500/30 rounded-xl p-3.5 transition-all cursor-pointer flex items-center justify-between"
-            >
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-purple-500 rounded-l-xl transition-all" />
-              
-              <div className="flex items-center gap-3.5 min-w-0">
-                <span className="text-2xl select-none shrink-0">🐉</span>
-                <div className="min-w-0">
-                  <span className="text-[9px] font-mono font-semibold px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded">
-                    D&D 5e
-                  </span>
-                  <h4 className="text-xs font-sans font-bold text-slate-100 group-hover:text-purple-300 transition-colors mt-2 truncate">
-                    龍與地下城 5e：絕冬城之影
-                  </h4>
-                  <p className="text-[10px] text-slate-400 leading-normal mt-1 truncate">
-                    招募人數: 4 - 5 玩家 | 預定 6 月中旬開跑
-                  </p>
-                </div>
-              </div>
+            {campaigns.length > 0 ? (
+              campaigns.map((camp) => (
+                <div 
+                  key={camp.id}
+                  onClick={() => handleOpenRecruiting(camp)}
+                  className="group relative bg-slate-950/50 hover:bg-slate-950/80 border border-slate-850 hover:border-purple-500/30 rounded-xl p-3.5 transition-all cursor-pointer flex items-center justify-between"
+                >
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-purple-500 rounded-l-xl transition-all" />
+                  
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <span className="text-2xl select-none shrink-0">{camp.emoji || '🐉'}</span>
+                    <div className="min-w-0">
+                      <span className="text-[9px] font-mono font-semibold px-2 py-0.5 bg-slate-900 border border-slate-800 text-slate-400 rounded">
+                        {camp.ruleset || 'D&D 5e'}
+                      </span>
+                      <h4 className="text-xs font-sans font-bold text-slate-100 group-hover:text-purple-300 transition-colors mt-2 truncate">
+                        {camp.title}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 leading-normal mt-1 truncate">
+                        招募人數: {camp.slots || 'N/A'} | {camp.schedule || '未定'}
+                      </p>
+                    </div>
+                  </div>
 
-              <div className="text-[10px] text-purple-400 font-mono flex items-center gap-0.5 group-hover:text-purple-300 shrink-0 select-none">
-                <span>展開招募</span>
-                <ChevronRight size={10} className="transform group-hover:translate-x-0.5 transition-transform" />
+                  <div className="text-[10px] text-purple-400 font-mono flex items-center gap-0.5 group-hover:text-purple-300 shrink-0 select-none">
+                    <span>展開招募</span>
+                    <ChevronRight size={10} className="transform group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-6 border border-dashed border-slate-800 rounded-xl">
+                <span className="text-lg">📦</span>
+                <p className="text-[10px] text-slate-500 font-mono mt-1.5">目前無招募中的戰役</p>
               </div>
-            </div>
+            )}
           </div>
         </motion.div>
 
@@ -332,13 +382,13 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
 
             {/* Total count badge */}
             <span className="px-2 py-0.5 bg-purple-950/40 text-purple-400 border border-purple-500/20 rounded text-[9px] font-mono">
-              {TTRPG_LOGS.length} RECORDS
+              {logs.length} RECORDS
             </span>
           </div>
 
           {/* Filtering tab bar */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-2 scrollbar-none">
-            {['All', 'D&D 5e', 'CoC 7th', 'Cyberpunk Red'].map((ruleset) => (
+            {availableRulesets.map((ruleset) => (
               <button
                 key={ruleset}
                 onClick={() => setActiveFilter(ruleset)}
@@ -670,10 +720,10 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                 <div className="space-y-5">
                   {/* Campaign Theme Header */}
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-3xl select-none leading-none">🐉</span>
+                    <span className="text-3xl select-none leading-none">{selectedCampaign?.emoji || '🐉'}</span>
                     <div>
                       <span className="text-[9px] font-mono font-bold tracking-widest text-purple-400 uppercase">New Campaign Recruitment</span>
-                      <h3 className="text-sm font-sans font-bold text-slate-200 line-clamp-1">絕冬城之影</h3>
+                      <h3 className="text-sm font-sans font-bold text-slate-200 line-clamp-1">{selectedCampaign?.title || '絕冬城之影'}</h3>
                     </div>
                   </div>
 
@@ -721,19 +771,19 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                     <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                       <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
                         <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">RULES</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">D&D 5e</span>
+                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedCampaign?.ruleset || 'D&D 5e'}</span>
                       </div>
                       <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
                         <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">SLOTS</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">4 - 5 玩家</span>
+                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedCampaign?.slots || '4 - 5 玩家'}</span>
                       </div>
                       <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0 col-span-2">
                         <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">SCHEDULE</span>
-                        <span className="text-slate-300 font-semibold block leading-tight">每週五 20:00 - 24:00</span>
+                        <span className="text-slate-300 font-semibold block leading-tight">{selectedCampaign?.schedule || '每週五 20:00 - 24:00'}</span>
                       </div>
                       <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0 col-span-2">
                         <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">PLATFORM</span>
-                        <span className="text-slate-300 font-semibold block leading-tight">Foundry VTT / Discord</span>
+                        <span className="text-slate-300 font-semibold block leading-tight">{selectedCampaign?.platform || 'Foundry VTT / Discord'}</span>
                       </div>
                     </div>
                   </div>

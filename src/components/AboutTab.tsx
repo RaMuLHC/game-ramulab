@@ -23,12 +23,15 @@ export default function AboutTab({ info }: AboutTabProps) {
     gameCount: null,
     memberSinceYear: null,
     hours2Weeks: null,
-    loading: false,
+    loading: true,
     error: false,
   });
 
   useEffect(() => {
-    if (!info.steamUrl) return;
+    if (!info.steamUrl) {
+      setSteamData(prev => ({ ...prev, loading: false }));
+      return;
+    }
 
     const steamUrl = info.steamUrl;
     const idMatch = steamUrl.match(/\/id\/([^/]+)/);
@@ -67,14 +70,14 @@ export default function AboutTab({ info }: AboutTabProps) {
     fetch(proxyUrl(profileXmlUrl))
       .then(res => {
         if (!res.ok) throw new Error("Profile fetch failed");
-        return res.json();
+        return CLOUDFLARE_WORKER_PROXY ? res.text() : res.json();
       })
-      .then(async (profileData) => {
-        const profileXmlText = profileData.contents;
+      .then(async (data) => {
+        const profileXmlText = CLOUDFLARE_WORKER_PROXY ? (data as string) : (data as any).contents;
         if (!profileXmlText) throw new Error("No profile content returned");
 
         const memberSinceMatch = profileXmlText.match(/<memberSince>(.*?)<\/memberSince>/i);
-        const hoursPlayed2WeeksMatch = profileXmlText.match(/<hoursPlayed2Weeks>(.*?)<\/hoursPlayed2Weeks>/i);
+        const hoursPlayed2WeeksMatch = profileXmlText.match(/<(?:hoursPlayed2Wk|hoursPlayed2Weeks)>(.*?)<\/(?:hoursPlayed2Wk|hoursPlayed2Weeks)>/i);
         const privacyStateMatch = profileXmlText.match(/<privacyState>(.*?)<\/privacyState>/i);
 
         const memberSince = memberSinceMatch ? memberSinceMatch[1] : null;
@@ -94,9 +97,10 @@ export default function AboutTab({ info }: AboutTabProps) {
           try {
             const gamesRes = await fetch(proxyUrl(gamesXmlUrl));
             if (gamesRes.ok) {
-              const gamesData = await gamesRes.json();
-              if (gamesData && gamesData.contents) {
-                const gamesXmlText = gamesData.contents;
+              const gamesXmlText = CLOUDFLARE_WORKER_PROXY 
+                ? await gamesRes.text() 
+                : (await gamesRes.json()).contents;
+              if (gamesXmlText) {
                 const matches = gamesXmlText.match(/<game>/gi);
                 if (matches) {
                   gameCount = matches.length;
@@ -297,19 +301,19 @@ export default function AboutTab({ info }: AboutTabProps) {
             <div className="flex flex-col text-xs p-2.5 bg-slate-950/40 rounded-lg border border-slate-800 justify-between h-full">
               <span className="text-slate-500 text-[10px] font-mono">收藏庫</span>
               <span className={`text-blue-400 font-mono font-semibold mt-1 transition-opacity duration-300 ${steamData.loading ? 'opacity-50 animate-pulse' : 'opacity-100'}`}>
-                {steamData.gameCount !== null ? `${steamData.gameCount} Games` : "fetching"}
+                {steamData.loading ? "fetching" : (steamData.error ? "Error" : (steamData.gameCount !== null ? `${steamData.gameCount} Games` : "Private"))}
               </span>
             </div>
             <div className="flex flex-col text-xs p-2.5 bg-slate-950/40 rounded-lg border border-slate-800 justify-between h-full">
               <span className="text-slate-500 text-[10px] font-mono">帳號創立</span>
               <span className={`text-slate-200 mt-1 font-mono transition-opacity duration-300 ${steamData.loading ? 'opacity-50 animate-pulse' : 'opacity-100'}`}>
-                {steamData.memberSinceYear !== null ? `${steamData.memberSinceYear} ✦` : "fetching"}
+                {steamData.loading ? "fetching" : (steamData.error ? "Error" : (steamData.memberSinceYear !== null ? `${steamData.memberSinceYear} ✦` : "Private"))}
               </span>
             </div>
             <div className="flex flex-col text-xs p-2.5 bg-slate-950/40 rounded-lg border border-slate-800 justify-between h-full">
               <span className="text-slate-500 text-[10px] font-mono">每週活躍時間</span>
               <span className={`text-slate-200 mt-1 font-mono transition-opacity duration-300 ${steamData.loading ? 'opacity-50 animate-pulse' : 'opacity-100'}`}>
-                {steamData.hours2Weeks !== null ? `${(parseFloat(steamData.hours2Weeks) / 2).toFixed(1)} Hours` : "fetching"}
+                {steamData.loading ? "fetching" : (steamData.error ? "Error" : (steamData.hours2Weeks !== null ? `${(parseFloat(steamData.hours2Weeks) / 2).toFixed(1)} Hours` : "0.0 Hours"))}
               </span>
             </div>
           </div>
