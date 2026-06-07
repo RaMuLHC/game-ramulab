@@ -84,7 +84,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
 
   // Fetch manifest on mount
   React.useEffect(() => {
-    fetch('/markdown/manifest.json')
+    fetch(`/markdown/manifest.json?t=${new Date().getTime()}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to load manifest");
         return res.json();
@@ -112,7 +112,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
     setSelectedLog(log);
     setIsLoadingLog(true);
     setLogMarkdownContent('');
-    fetch(log.markdownFile)
+    fetch(`${log.markdownFile}?t=${new Date().getTime()}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to load log");
         return res.text();
@@ -133,7 +133,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
     setShowRecruiting(true);
     setIsLoadingRecruitment(true);
     setRecruitmentMarkdownContent('');
-    fetch(camp.markdownFile)
+    fetch(`${camp.markdownFile}?t=${new Date().getTime()}`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to load recruitment info");
         return res.text();
