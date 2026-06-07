@@ -10,27 +10,7 @@ interface VideoGamesTabProps {
 export default function VideoGamesTab({ info }: VideoGamesTabProps) {
   const [copiedMc, setCopiedMc] = useState(false);
   const [copiedDiscord, setCopiedDiscord] = useState(false);
-  
-  // Simulated stats to make the gaming server feel alive and extremely authentic
-  const [playerCount, setPlayerCount] = useState(6);
-  const [latency, setLatency] = useState(24);
 
-  useEffect(() => {
-    // Subtle fluctuation of server stats over time
-    const interval = setInterval(() => {
-      setPlayerCount(prev => {
-        const delta = Math.random() > 0.5 ? 1 : -1;
-        const next = prev + delta;
-        return next >= 2 && next <= 15 ? next : prev;
-      });
-      setLatency(prev => {
-        const delta = Math.round((Math.random() - 0.5) * 4);
-        const next = prev + delta;
-        return next >= 18 && next <= 35 ? next : prev;
-      });
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleCopyMc = () => {
     navigator.clipboard.writeText(info.minecraftIp);
@@ -123,22 +103,6 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
                   </>
                 )}
               </button>
-            </div>
-
-            {/* Simulated Server Parameters */}
-            <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-900 text-[11px] font-mono">
-              <div>
-                <span className="text-slate-500">當前人數:</span>{' '}
-                <span className="text-blue-400 font-bold">{playerCount} / 32</span>
-              </div>
-              <div>
-                <span className="text-slate-500">伺服延遲:</span>{' '}
-                <span className="text-purple-400 font-semibold">~{latency}ms</span>
-              </div>
-              <div>
-                <span className="text-slate-500">主機核心:</span>{' '}
-                <span className="text-slate-300">1.20.1 Forge</span>
-              </div>
             </div>
           </div>
 
