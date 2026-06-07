@@ -71,9 +71,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
       title: "龍與地下城 5e：絕冬城之影",
       ruleset: "D&D 5e",
       emoji: "🐉",
-      slots: "4 - 5 玩家",
-      schedule: "每週五 20:00 - 24:00",
-      platform: "Foundry VTT / Discord",
+      playerCount: "0/5",
       markdownFile: "/markdown/recruitment/neverwinter.md"
     }
   ]);
@@ -277,7 +275,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                         {camp.title}
                       </h4>
                       <p className="text-[10px] text-slate-400 leading-normal mt-1 truncate">
-                        招募人數: {camp.slots || 'N/A'} | {camp.schedule || '未定'}
+                        報名人數: {camp.playerCount || '未定'}
                       </p>
                     </div>
                   </div>
@@ -714,32 +712,6 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                           </button>
                         );
                       })}
-                    </div>
-                  </div>
-
-                  {/* Key Stats items for Recruitment */}
-                  <div className="border-t border-slate-800/60 pt-4">
-                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                      <Scroll size={11} className="text-slate-400" />
-                      <span>招募細節 // DETAILS</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">RULES</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedCampaign?.ruleset || 'D&D 5e'}</span>
-                      </div>
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">SLOTS</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedCampaign?.slots || '4 - 5 玩家'}</span>
-                      </div>
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0 col-span-2">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">SCHEDULE</span>
-                        <span className="text-slate-300 font-semibold block leading-tight">{selectedCampaign?.schedule || '每週五 20:00 - 24:00'}</span>
-                      </div>
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0 col-span-2">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">PLATFORM</span>
-                        <span className="text-slate-300 font-semibold block leading-tight">{selectedCampaign?.platform || 'Foundry VTT / Discord'}</span>
-                      </div>
                     </div>
                   </div>
                 </div>

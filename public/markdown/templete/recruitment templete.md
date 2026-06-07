@@ -1,8 +1,8 @@
 ---
 title: ""
-date: ""
 ruleset: ""
-summary: ""
+playerCount: ""
+emoji: ""
 ---
 # 標題
 ##  招募概要 // Overview
