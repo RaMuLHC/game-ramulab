@@ -127,12 +127,8 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
 
     checkFvtt();
     
-    // Poll every 30 seconds
-    const interval = setInterval(checkFvtt, 30000);
-
     return () => {
       active = false;
-      clearInterval(interval);
     };
   }, [info.fvttUrl]);
 

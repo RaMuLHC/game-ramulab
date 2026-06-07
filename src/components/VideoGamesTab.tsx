@@ -54,12 +54,8 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
 
     fetchStatus();
     
-    // Poll every 30 seconds to keep it fresh
-    const interval = setInterval(fetchStatus, 30000);
-    
     return () => {
       active = false;
-      clearInterval(interval);
     };
   }, [info.minecraftIp]);
 
