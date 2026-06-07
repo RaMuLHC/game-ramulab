@@ -1,5 +1,5 @@
 ---
-title: 危殼：凡達林之下 破碎方尖碑（歐區）
+title: 危殼：凡達林之下 破碎方尖碑（美區）
 ruleset: D&D 5e
 playerCount: 3/4
 emoji: ""
