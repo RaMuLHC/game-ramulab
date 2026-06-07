@@ -290,7 +290,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               ) : fvttStatus.online ? (
                 <div className="flex items-center gap-2 bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-500/30">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-semibold">Active</span>
+                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-semibold">Online</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 bg-rose-950/40 px-2.5 py-1 rounded-full border border-rose-500/30">
