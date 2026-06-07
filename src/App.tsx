@@ -38,6 +38,20 @@ export default function App() {
     }
   }, []);
 
+  // Deep-linking tab redirection
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const logParam = params.get('log');
+    const recruitmentParam = params.get('recruitment');
+
+    if (logParam || recruitmentParam) {
+      setActiveTab('ttrpg');
+    } else if (tabParam === 'ttrpg' || tabParam === 'videogames' || tabParam === 'about') {
+      setActiveTab(tabParam as ActiveTab);
+    }
+  }, []);
+
   // Save updates
   const handleSaveInfo = (newInfo: GameInformation) => {
     setInfo(newInfo);

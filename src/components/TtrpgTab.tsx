@@ -84,25 +84,9 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
   const [isLoadingLog, setIsLoadingLog] = useState(false);
   const [isLoadingRecruitment, setIsLoadingRecruitment] = useState(false);
 
-  // Fetch manifest on mount
-  React.useEffect(() => {
-    fetch(`/markdown/manifest.json?t=${new Date().getTime()}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to load manifest");
-        return res.json();
-      })
-      .then(data => {
-        if (data.recruitment && data.recruitment.length > 0) {
-          setCampaigns(data.recruitment);
-        }
-        if (data.log && data.log.length > 0) {
-          setLogs(data.log);
-        }
-      })
-      .catch(err => {
-        console.error("Failed to load TTRPG manifest:", err);
-      });
-  }, []);
+  // Share overlay states
+  const [shareLinkInfo, setShareLinkInfo] = useState<{ url: string; title: string } | null>(null);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
 
   const handleCopyFvtt = () => {
     navigator.clipboard.writeText(info.fvttUrl);
@@ -150,6 +134,52 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
         setIsLoadingRecruitment(false);
       });
   };
+
+  const handleShare = (type: 'log' | 'recruitment', id: string) => {
+    const title = type === 'log' ? selectedLog?.title || '' : selectedCampaign?.title || '';
+    const shareUrl = `${window.location.origin}${window.location.pathname}?${type}=${id}`;
+    setShareLinkInfo({ url: shareUrl, title });
+  };
+
+  // Fetch manifest on mount and handle deep-linking
+  React.useEffect(() => {
+    fetch(`/markdown/manifest.json?t=${new Date().getTime()}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load manifest");
+        return res.json();
+      })
+      .then(data => {
+        const loadedCampaigns = data.recruitment || [];
+        const loadedLogs = data.log || [];
+
+        if (loadedCampaigns.length > 0) {
+          setCampaigns(loadedCampaigns);
+        }
+        if (loadedLogs.length > 0) {
+          setLogs(loadedLogs);
+        }
+
+        // Parse query params for deep linking
+        const params = new URLSearchParams(window.location.search);
+        const logId = params.get('log');
+        const recruitmentId = params.get('recruitment');
+
+        if (logId) {
+          const matchedLog = loadedLogs.find((l: any) => l.id === logId);
+          if (matchedLog) {
+            handleSelectLog(matchedLog);
+          }
+        } else if (recruitmentId) {
+          const matchedCamp = loadedCampaigns.find((c: any) => c.id === recruitmentId);
+          if (matchedCamp) {
+            handleOpenRecruiting(matchedCamp);
+          }
+        }
+      })
+      .catch(err => {
+        console.error("Failed to load TTRPG manifest:", err);
+      });
+  }, []);
 
   // Dynamically compute unique rulesets from logs
   const availableRulesets = ['All', ...Array.from(new Set(logs.map(log => log.ruleset))).filter(Boolean)];
@@ -537,10 +567,14 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                   </div>
                 </div>
 
-                {/* Bottom branding footer */}
-                <div className="hidden md:block pt-5 border-t border-slate-800/50 text-[9px] text-slate-650 font-mono tracking-wider mt-4">
-                  RAMULAB CHRONICLES ARCHIVE <br />
-                  SECURE STORAGE SEC // 026
+                {/* Bottom share button */}
+                <div className="pt-5 border-t border-slate-800/50 mt-4 shrink-0">
+                  <button
+                    onClick={() => handleShare('log', selectedLog.id)}
+                    className="w-full py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/30 text-slate-350 hover:text-purple-300 rounded-xl text-xs font-mono transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md"
+                  >
+                    <span>🔗</span> 分享此頁面 // SHARE
+                  </button>
                 </div>
               </div>
 
@@ -716,10 +750,14 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                   </div>
                 </div>
 
-                {/* Bottom branding footer */}
-                <div className="hidden md:block pt-5 border-t border-slate-800/50 text-[9px] text-slate-650 font-mono tracking-wider mt-4">
-                  RAMULAB RECRUITMENT ACTIVE <br />
-                  SECURE STORAGE SEC // 026
+                {/* Bottom share button */}
+                <div className="pt-5 border-t border-slate-800/50 mt-4 shrink-0">
+                  <button
+                    onClick={() => handleShare('recruitment', selectedCampaign.id)}
+                    className="w-full py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/30 text-slate-350 hover:text-purple-300 rounded-xl text-xs font-mono transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shadow-md"
+                  >
+                    <span>🔗</span> 分享此頁面 // SHARE
+                  </button>
                 </div>
               </div>
 
@@ -805,13 +843,89 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                 {/* Footnotes / Action CTA */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-800/60 pt-5 mt-8 mb-2">
                   <span className="text-[10px] text-slate-500 leading-relaxed max-w-md">
-                    * 點擊加入 Discord 語音或向 DM (Ramu Labs) 報名角色背景。車卡完成後即可於開團時間登入 Foundry VTT 展開征途。
+                    報名方法：請關閉此浮動視窗並加入我們的Discord伺服器（NA TRPG），並私聊DM報名。
                   </span>
                   <button
                     onClick={() => setShowRecruiting(false)}
                     className="px-4 py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-mono transition-all cursor-pointer shadow-md hover:border-purple-500/20 whitespace-nowrap align-self-end sm:align-self-auto"
                   >
                     關閉並返回
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Link Modal Overlay */}
+      <AnimatePresence>
+        {shareLinkInfo && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShareLinkInfo(null)}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Container */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-md bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_40px_rgba(168,85,247,0.25)] p-6 z-10"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShareLinkInfo(null)}
+                className="absolute top-4 right-4 p-1.5 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white rounded-lg hover:border-purple-500/30 transition-all cursor-pointer"
+                title="關閉"
+              >
+                <X size={13} />
+              </button>
+
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="p-1.5 bg-purple-950/50 border border-purple-500/30 rounded-lg text-purple-400">
+                  <Compass size={16} />
+                </div>
+                <h3 className="text-sm font-sans font-bold text-slate-100">分享此頁面連結</h3>
+              </div>
+
+              <p className="text-xs text-slate-450 mb-4 font-sans leading-relaxed">
+                您可以使用此專屬連結直接分享「{shareLinkInfo.title}」內容給其他隊友：
+              </p>
+
+              {/* URL Box (FVTT format style) */}
+              <div className="bg-slate-950/80 rounded-xl border border-slate-800 p-4">
+                <div className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">
+                  Shareable Link
+                </div>
+                <div className="flex items-center justify-between mt-1.5 gap-4">
+                  <div className="text-xs font-mono font-semibold text-purple-300 overflow-x-auto whitespace-nowrap scrollbar-hide py-1 flex-1">
+                    {shareLinkInfo.url}
+                  </div>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareLinkInfo.url);
+                      setCopiedShareLink(true);
+                      setTimeout(() => setCopiedShareLink(false), 2000);
+                    }}
+                    className="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-purple-500/30 hover:bg-slate-800 text-slate-400 hover:text-purple-300 rounded-lg text-xs font-mono transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    {copiedShareLink ? (
+                      <>
+                        <Check size={12} className="text-emerald-400" />
+                        <span className="text-emerald-400">已複製</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={12} />
+                        <span>複製</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
