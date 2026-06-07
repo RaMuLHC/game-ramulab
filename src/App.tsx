@@ -29,6 +29,10 @@ export default function App() {
           parsed.discordServerUrl = "https://discord.gg/9Y2hBKEhac";
           localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
         }
+        if (parsed.steamUrl === "https://steamcommunity.com/id/ramulab") {
+          parsed.steamUrl = "https://steamcommunity.com/id/ramu0";
+          localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
+        }
         setInfo(parsed);
       }
     } catch (e) {
