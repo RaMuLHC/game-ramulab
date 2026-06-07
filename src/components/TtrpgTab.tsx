@@ -19,6 +19,10 @@ const slugify = (text: string) => {
     .replace(/\s+/g, '-');
 };
 
+const stripFrontmatter = (text: string) => {
+  return text.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n)?/, '');
+};
+
 const getChildrenText = (children: React.ReactNode): string => {
   if (!children) return '';
   if (typeof children === 'string') return children;
@@ -118,7 +122,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
         return res.text();
       })
       .then(text => {
-        setLogMarkdownContent(text);
+        setLogMarkdownContent(stripFrontmatter(text));
         setIsLoadingLog(false);
       })
       .catch(err => {
@@ -139,7 +143,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
         return res.text();
       })
       .then(text => {
-        setRecruitmentMarkdownContent(text);
+        setRecruitmentMarkdownContent(stripFrontmatter(text));
         setIsLoadingRecruitment(false);
       })
       .catch(err => {
