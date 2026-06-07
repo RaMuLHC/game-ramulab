@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Gamepad2, Settings, Swords, User, Dices, ChevronRight, VolumeX } from 'lucide-react';
+import { Gamepad2, Swords, User, Dices } from 'lucide-react';
 import { GameInformation, ActiveTab } from './types';
 import { DEFAULT_GAME_INFO } from './data';
 import NeonBackground from './components/NeonBackground';
 import AboutTab from './components/AboutTab';
 import VideoGamesTab from './components/VideoGamesTab';
 import TtrpgTab from './components/TtrpgTab';
-import AdminPanel from './components/AdminPanel';
 
 export default function App() {
   const [info, setInfo] = useState<GameInformation>(DEFAULT_GAME_INFO);
   const [activeTab, setActiveTab] = useState<ActiveTab>('about');
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Load from localStorage on initialization
   useEffect(() => {
@@ -151,16 +149,6 @@ export default function App() {
               </span>
             </button>
           </nav>
-
-          {/* Quick interactive Settings / Config trigger */}
-          <button
-            onClick={() => setIsAdminOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-mono text-purple-300 hover:text-white bg-purple-950/30 hover:bg-purple-950/60 border border-purple-500/20 hover:border-purple-500/50 p-2 px-3 rounded-xl transition-all cursor-pointer active:scale-95 shadow-[0_0_10px_rgba(168,85,247,0.05)]"
-            title="自訂我的帳號連線連結"
-          >
-            <Settings size={14} className="animate-spin-slow rotate-45" />
-            <span>自訂資訊</span>
-          </button>
         </header>
 
         {/* Tab content panel wrapper with animated transitions */}
@@ -193,13 +181,6 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Diagnostic settings form Modal */}
-      <AdminPanel 
-        isOpen={isAdminOpen} 
-        onClose={() => setIsAdminOpen(false)} 
-        info={info} 
-        onSave={handleSaveInfo} 
-      />
     </div>
   );
 }

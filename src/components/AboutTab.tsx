@@ -287,19 +287,19 @@ export default function AboutTab({ info }: AboutTabProps) {
             <div className="flex flex-col text-xs p-2.5 bg-slate-950/40 rounded-lg border border-slate-800 justify-between h-full">
               <span className="text-slate-500 text-[10px] font-mono">收藏庫</span>
               <span className={`text-blue-400 font-mono font-semibold mt-1 transition-opacity duration-300 ${steamData.loading ? 'opacity-50 animate-pulse' : 'opacity-100'}`}>
-                {steamData.gameCount !== null ? `${steamData.gameCount} Games` : "250+ Games"}
+                {steamData.gameCount !== null ? `${steamData.gameCount} Games` : "fetching"}
               </span>
             </div>
             <div className="flex flex-col text-xs p-2.5 bg-slate-950/40 rounded-lg border border-slate-800 justify-between h-full">
               <span className="text-slate-500 text-[10px] font-mono">帳號創立</span>
               <span className={`text-slate-200 mt-1 font-mono transition-opacity duration-300 ${steamData.loading ? 'opacity-50 animate-pulse' : 'opacity-100'}`}>
-                {steamData.memberSinceYear !== null ? `${steamData.memberSinceYear} ✦` : "2016 ✦"}
+                {steamData.memberSinceYear !== null ? `${steamData.memberSinceYear} ✦` : "fetching"}
               </span>
             </div>
             <div className="flex flex-col text-xs p-2.5 bg-slate-950/40 rounded-lg border border-slate-800 justify-between h-full">
               <span className="text-slate-500 text-[10px] font-mono">每週活躍時間</span>
               <span className={`text-slate-200 mt-1 font-mono transition-opacity duration-300 ${steamData.loading ? 'opacity-50 animate-pulse' : 'opacity-100'}`}>
-                {steamData.hours2Weeks !== null ? `${(parseFloat(steamData.hours2Weeks) / 2).toFixed(1)} Hours` : "12+ Hours"}
+                {steamData.hours2Weeks !== null ? `${(parseFloat(steamData.hours2Weeks) / 2).toFixed(1)} Hours` : "fetching"}
               </span>
             </div>
           </div>
