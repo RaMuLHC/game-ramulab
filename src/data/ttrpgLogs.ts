@@ -3,14 +3,15 @@ export interface TtrpgLog {
   title: string;
   date: string;
   ruleset: string;
-  campaign: string;
+  campaign?: string;
   summary: string;
-  duration: string;
-  emoji: string;
-  accentColor: string;
-  author: string;
-  characters: string[];
+  duration?: string;
+  emoji?: string;
+  accentColor?: string;
+  author?: string;
+  characters?: string[];
   markdownFile: string;
+  status?: string;
 }
 
 export const TTRPG_LOGS: TtrpgLog[] = [

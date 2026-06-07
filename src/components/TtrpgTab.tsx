@@ -416,7 +416,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-purple-500 rounded-l-xl transition-all" />
 
                 {/* Left side: Emoji */}
-                <span className="text-2xl select-none pt-0.5 shrink-0">📜</span>
+                <span className="text-2xl select-none pt-0.5 shrink-0">{log.emoji || '📜'}</span>
 
                 {/* Right side details */}
                 <div className="flex-1 min-w-0">
@@ -437,6 +437,12 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                   <p className="text-[11px] text-slate-450 leading-relaxed mt-1 line-clamp-2">
                     {log.summary}
                   </p>
+
+                  {log.status && (
+                    <p className="text-[10px] text-slate-450 leading-normal mt-1.5 truncate">
+                      狀態: {log.status}
+                    </p>
+                  )}
 
                   <div className="flex items-center justify-end mt-2.5 pt-2 border-t border-slate-900">
                     <div className="text-[9px] text-purple-400 font-mono flex items-center gap-0.5 group-hover:text-purple-300">
@@ -485,7 +491,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                 <div className="space-y-5">
                   {/* Campaign Theme Header */}
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-3xl select-none leading-none">📜</span>
+                    <span className="text-3xl select-none leading-none">{selectedLog.emoji || '📜'}</span>
                     <div>
                       <span className="text-[9px] font-mono font-bold tracking-widest text-purple-400 uppercase">Chronicle Archive</span>
                       <h3 className="text-sm font-sans font-bold text-slate-200 line-clamp-1">{selectedLog.title}</h3>
