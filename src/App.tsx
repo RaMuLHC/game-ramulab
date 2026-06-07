@@ -39,6 +39,10 @@ export default function App() {
           parsed.trpgDiscordUrl = "https://discord.gg/3Vjd2QdVyt";
           localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
         }
+        if (parsed.minecraftIp === "mc.ramulab.net:25565" || !parsed.minecraftIp) {
+          parsed.minecraftIp = "machine-relax.gl.joinmc.link";
+          localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
+        }
         setInfo(parsed);
       }
     } catch (e) {

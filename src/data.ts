@@ -8,7 +8,7 @@ export const DEFAULT_GAME_INFO: GameInformation = {
   discordServerUrl: "https://discord.gg/9Y2hBKEhac",
   discordServerWidgetId: "1198793646577811546", // Pre-loaded default server widget or custom server ID
   riotId: "RAMU#6666",
-  minecraftIp: "mc.ramulab.net:25565",
+  minecraftIp: "machine-relax.gl.joinmc.link",
   minecraftModpackName: "Pixelmon / ATM9 Lite Modpack",
   minecraftModpackUrl: "https://www.curseforge.com/minecraft/modpacks/all-the-mods-9",
   fvttUrl: "https://fvtt.ramulab.com",
