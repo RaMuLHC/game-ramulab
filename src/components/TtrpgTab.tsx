@@ -404,7 +404,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
           </div>
 
           {/* Session Cards list */}
-          <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-950 scrollbar-track-transparent">
+          <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-purple-950 scrollbar-track-transparent">
             {filteredLogs.map((log) => (
               <motion.div
                 key={log.id}
@@ -440,13 +440,13 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
 
                   <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-900">
                     {log.status ? (
-                      <div className="text-[9px] text-slate-500 font-mono truncate">
-                        狀態: <span className="text-slate-350">{log.status}</span>
+                      <div className="text-[10px] text-slate-400 font-sans truncate">
+                        狀態: <span className="text-slate-300">{log.status}</span>
                       </div>
                     ) : (
                       <div />
                     )}
-                    <div className="text-[9px] text-purple-400 font-mono flex items-center gap-0.5 group-hover:text-purple-300">
+                    <div className="text-[10px] text-purple-400 font-mono flex items-center gap-0.5 group-hover:text-purple-300">
                       <span>展開閱讀</span> 
                       <ChevronRight size={10} className="transform group-hover:translate-x-0.5 transition-transform" />
                     </div>
