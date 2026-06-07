@@ -11,7 +11,7 @@ export const DEFAULT_GAME_INFO: GameInformation = {
   minecraftIp: "mc.ramulab.net:25565",
   minecraftModpackName: "Pixelmon / ATM9 Lite Modpack",
   minecraftModpackUrl: "https://www.curseforge.com/minecraft/modpacks/all-the-mods-9",
-  fvttUrl: "https://fvtt.ramulab.net:30000",
-  trpgDiscordUrl: "https://discord.gg/ramulab-trpg-club",
+  fvttUrl: "https://fvtt.ramulab.com",
+  trpgDiscordUrl: "https://discord.gg/3Vjd2QdVyt",
   ubisoftId: "RaMu0"
 };

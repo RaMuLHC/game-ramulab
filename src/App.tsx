@@ -31,6 +31,14 @@ export default function App() {
           parsed.steamUrl = "https://steamcommunity.com/id/ramu0";
           localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
         }
+        if (parsed.fvttUrl === "https://fvtt.ramulab.net:30000" || !parsed.fvttUrl) {
+          parsed.fvttUrl = "https://fvtt.ramulab.com";
+          localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
+        }
+        if (parsed.trpgDiscordUrl === "https://discord.gg/ramulab-trpg-club" || !parsed.trpgDiscordUrl) {
+          parsed.trpgDiscordUrl = "https://discord.gg/3Vjd2QdVyt";
+          localStorage.setItem('ramulab_game_info', JSON.stringify(parsed));
+        }
         setInfo(parsed);
       }
     } catch (e) {
