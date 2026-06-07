@@ -105,6 +105,21 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
     let active = true;
     
     const checkFvtt = () => {
+      // Check sessionStorage cache first to prevent spamming on page refreshes
+      try {
+        const cached = sessionStorage.getItem('fvtt_status_cache');
+        if (cached) {
+          const { online, timestamp } = JSON.parse(cached);
+          // If cache is less than 2 minutes (120,000 ms) old, use it
+          if (Date.now() - timestamp < 120000) {
+            setFvttStatus({ online, loading: false });
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to read FVTT status cache:", e);
+      }
+
       // Ensure the URL is absolute
       const urlToCheck = info.fvttUrl.startsWith('http://') || info.fvttUrl.startsWith('https://') 
         ? info.fvttUrl 
@@ -115,12 +130,24 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
         .then(() => {
           if (active) {
             setFvttStatus({ online: true, loading: false });
+            try {
+              sessionStorage.setItem('fvtt_status_cache', JSON.stringify({
+                online: true,
+                timestamp: Date.now()
+              }));
+            } catch (e) {}
           }
         })
         .catch(err => {
           console.warn("FVTT reachability check failed (offline or network error):", err);
           if (active) {
             setFvttStatus({ online: false, loading: false });
+            try {
+              sessionStorage.setItem('fvtt_status_cache', JSON.stringify({
+                online: false,
+                timestamp: Date.now()
+              }));
+            } catch (e) {}
           }
         });
     };

@@ -28,6 +28,21 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
     let active = true;
     
     const fetchStatus = () => {
+      // Check sessionStorage cache first to prevent spamming on page refreshes
+      try {
+        const cached = sessionStorage.getItem('mc_status_cache');
+        if (cached) {
+          const { online, players, version, timestamp } = JSON.parse(cached);
+          // If cache is less than 2 minutes (120,000 ms) old, use it
+          if (Date.now() - timestamp < 120000) {
+            setServerStatus({ online, players, version, loading: false });
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to read MC status cache:", e);
+      }
+
       // Use mcstatus.io v2 Java status API which has full CORS support
       fetch(`https://api.mcstatus.io/v2/status/java/${info.minecraftIp}`)
         .then(res => {
@@ -36,12 +51,24 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
         })
         .then(data => {
           if (active) {
+            const players = data.online && data.players ? { online: data.players.online, max: data.players.max } : null;
+            const version = data.version?.name_clean || null;
+
             setServerStatus({
               online: data.online,
-              players: data.players ? { online: data.players.online, max: data.players.max } : null,
-              version: data.version?.name_clean || null,
+              players,
+              version,
               loading: false
             });
+
+            try {
+              sessionStorage.setItem('mc_status_cache', JSON.stringify({
+                online: data.online,
+                players,
+                version,
+                timestamp: Date.now()
+              }));
+            } catch (e) {}
           }
         })
         .catch(err => {
