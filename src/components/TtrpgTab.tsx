@@ -842,8 +842,8 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
 
                 {/* Footnotes / Action CTA */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-slate-800/60 pt-5 mt-8 mb-2">
-                  <span className="text-[10px] text-slate-500 leading-relaxed max-w-md">
-                    報名方法：請關閉此浮動視窗並加入我們的Discord伺服器（NA TRPG），並私聊DM報名。
+                  <span className="text-xs text-slate-300 leading-relaxed max-w-lg">
+                    <strong className="text-purple-400 font-bold">報名方法：</strong>請關閉此浮動視窗並加入我們的Discord伺服器（NA TRPG），並私聊DM報名。
                   </span>
                   <button
                     onClick={() => setShowRecruiting(false)}
