@@ -416,7 +416,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-purple-500 rounded-l-xl transition-all" />
 
                 {/* Left side: Emoji */}
-                <span className="text-2xl select-none pt-0.5 shrink-0">{log.emoji}</span>
+                <span className="text-2xl select-none pt-0.5 shrink-0">📜</span>
 
                 {/* Right side details */}
                 <div className="flex-1 min-w-0">
@@ -438,10 +438,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                     {log.summary}
                   </p>
 
-                  <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-900">
-                    <div className="text-[9px] text-slate-500 truncate">
-                      敘事主持人: <span className="text-slate-350 font-mono">{log.author}</span>
-                    </div>
+                  <div className="flex items-center justify-end mt-2.5 pt-2 border-t border-slate-900">
                     <div className="text-[9px] text-purple-400 font-mono flex items-center gap-0.5 group-hover:text-purple-300">
                       <span>展開閱讀</span> 
                       <ChevronRight size={10} className="transform group-hover:translate-x-0.5 transition-transform" />
@@ -483,24 +480,15 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
               className="relative w-full max-w-5xl bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.25)] flex flex-col md:flex-row h-[85vh] max-h-[750px] overflow-hidden z-10"
             >
-              {/* Top Exit trigger (Close Button) on absolute corner */}
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="absolute top-4 right-4 p-2 bg-slate-950/60 border border-slate-800 text-slate-400 hover:text-white rounded-lg hover:border-purple-500/30 transition-all cursor-pointer z-20 active:scale-95"
-                title="關閉視窗"
-              >
-                <X size={15} />
-              </button>
-
-              {/* Sidebar: Meta specifications (full-width on mobile, md:width-72 on desktop) */}
+                    {/* Sidebar: Meta specifications (full-width on mobile, md:width-72 on desktop) */}
               <div className="w-full md:w-72 bg-slate-950/60 border-b md:border-b-0 md:border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0 overflow-y-auto max-h-[35vh] md:max-h-full">
                 <div className="space-y-5">
                   {/* Campaign Theme Header */}
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-3xl select-none leading-none">{selectedLog.emoji}</span>
+                    <span className="text-3xl select-none leading-none">📜</span>
                     <div>
                       <span className="text-[9px] font-mono font-bold tracking-widest text-purple-400 uppercase">Chronicle Archive</span>
-                      <h3 className="text-sm font-sans font-bold text-slate-200 line-clamp-1">{selectedLog.campaign}</h3>
+                      <h3 className="text-sm font-sans font-bold text-slate-200 line-clamp-1">{selectedLog.title}</h3>
                     </div>
                   </div>
 
@@ -523,12 +511,12 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                               }
                             }}
-                            className={`w-full text-left font-sans text-[11px] transition-all hover:text-purple-350 py-1 px-1.5 rounded-lg hover:bg-purple-950/15 active:scale-[0.98] block cursor-pointer truncate ${
+                            className={`w-full text-left font-sans text-[11px] transition-all hover:text-purple-355 py-1 px-1.5 rounded-lg hover:bg-purple-950/15 active:scale-[0.98] block cursor-pointer truncate ${
                               isLevel1 
                                 ? 'font-bold text-slate-200 border-l border-purple-500/40 pl-2' 
                                 : isLevel2
                                   ? 'text-slate-400 pl-3 border-l border-slate-800/80'
-                                  : 'text-slate-500 pl-4.5 border-l border-transparent'
+                                  : 'text-slate-550 pl-4.5 border-l border-transparent'
                             }`}
                             title={h.text}
                           >
@@ -536,54 +524,6 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                           </button>
                         );
                       })}
-                    </div>
-                  </div>
-
-                  {/* Key Stats items - ultra compact */}
-                  <div className="border-t border-slate-800/60 pt-4">
-                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                      <Scroll size={11} className="text-slate-400" />
-                      <span>冒險細節 // INFO</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">RULES</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedLog.ruleset}</span>
-                      </div>
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">TIME</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedLog.duration}</span>
-                      </div>
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">DATE</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedLog.date}</span>
-                      </div>
-                      <div className="bg-slate-900/60 border border-slate-850 p-1 px-1.5 rounded-lg min-w-0">
-                        <span className="text-slate-500 block text-[8px] font-mono leading-none mb-0.5">DM</span>
-                        <span className="text-slate-300 font-semibold truncate block leading-tight">{selectedLog.author}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Adventure Characters chip list */}
-                  <div className="border-t border-slate-800/60 pt-4">
-                    <div className="text-[9px] text-slate-500 font-mono uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                      <Users size={11} className="text-slate-400" />
-                      <span>冒險成員 // PARTY</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {Array.isArray(selectedLog.characters) ? (
-                        selectedLog.characters.map((char, idx) => (
-                          <div 
-                            key={idx} 
-                            className="bg-slate-900/40 border border-slate-850 p-0.5 px-1.5 rounded-md text-[9px] text-slate-350 font-sans"
-                          >
-                            {char}
-                          </div>
-                        ))
-                      ) : (
-                        <span className="text-[10px] text-slate-500 italic">無成員資料</span>
-                      )}
                     </div>
                   </div>
                 </div>
