@@ -9,23 +9,7 @@ import { GameInformation } from '../types';
 import { TTRPG_LOGS, TtrpgLog } from '../data/ttrpgLogs';
 import Markdown from 'react-markdown';
 
-const CAMPAIGN_RECRUITMENT_MD = `# 🐉 龍與地下城 5e：絕冬城之影
 
-## 📋 招募概要 // Overview
-* **遊戲規則**: D&D 5e (Dungeons & Dragons)
-* **模組名稱**: 絕冬城之影 (Shadow of Neverwinter)
-* **招募人數**: 4 - 5 玩家
-* **開團時間**: 每週五晚上 20:00 - 24:00 (預定 6 月中旬開跑)
-* **跑團平臺**: Foundry VTT / Discord 語音
-
-## 🛡️ 車卡要求 // Character Generation
-* **起始等級**: LV 1
-* **角色屬性**: 27 點購點法
-* **支援書籍**: PHB + Xanathar + Tasha (非官方擴充須經 DM 審核)
-* **配置要素**: 請準備簡短的角色個人動機、背景故事。
-
-## ❄️ 故事背景 // Adventure Prelude
-絕冬城從未如此冷冽。本該是盛夏之季，寒冬與白霜卻在一夜之間凍結了周圍的林道，村民們耳邊總能聽見來自微風中的呢喃... 市議會發出了緊急懸賞，召集無畏的冒險者們穿透這場籠罩森林的黑霜與迷霧。`;
 
 const slugify = (text: string) => {
   return text
@@ -76,10 +60,56 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
   const [showRecruiting, setShowRecruiting] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('All');
 
+  // Dynamic Markdown loading states
+  const [logMarkdownContent, setLogMarkdownContent] = useState<string>('');
+  const [recruitmentMarkdownContent, setRecruitmentMarkdownContent] = useState<string>('');
+  const [isLoadingLog, setIsLoadingLog] = useState(false);
+  const [isLoadingRecruitment, setIsLoadingRecruitment] = useState(false);
+
   const handleCopyFvtt = () => {
     navigator.clipboard.writeText(info.fvttUrl);
     setCopiedFvtt(true);
     setTimeout(() => setCopiedFvtt(false), 2000);
+  };
+
+  const handleSelectLog = (log: TtrpgLog) => {
+    setSelectedLog(log);
+    setIsLoadingLog(true);
+    setLogMarkdownContent('');
+    fetch(log.markdownFile)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load log");
+        return res.text();
+      })
+      .then(text => {
+        setLogMarkdownContent(text);
+        setIsLoadingLog(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLogMarkdownContent("⚠️ 無法載入此日誌檔案。");
+        setIsLoadingLog(false);
+      });
+  };
+
+  const handleOpenRecruiting = () => {
+    setShowRecruiting(true);
+    setIsLoadingRecruitment(true);
+    setRecruitmentMarkdownContent('');
+    fetch('/markdown/campaign-recruitment.md')
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to load recruitment info");
+        return res.text();
+      })
+      .then(text => {
+        setRecruitmentMarkdownContent(text);
+        setIsLoadingRecruitment(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setRecruitmentMarkdownContent("⚠️ 無法載入招募簡介檔案。");
+        setIsLoadingRecruitment(false);
+      });
   };
 
   const filteredLogs = activeFilter === 'All'
@@ -185,7 +215,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
             </h3>
             
             <div 
-              onClick={() => setShowRecruiting(true)}
+              onClick={handleOpenRecruiting}
               className="group relative bg-slate-950/50 hover:bg-slate-950/80 border border-slate-850 hover:border-purple-500/30 rounded-xl p-3.5 transition-all cursor-pointer flex items-center justify-between"
             >
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-transparent group-hover:bg-purple-500 rounded-l-xl transition-all" />
@@ -329,7 +359,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               <motion.div
                 key={log.id}
                 whileHover={{ x: 3 }}
-                onClick={() => setSelectedLog(log)}
+                onClick={() => handleSelectLog(log)}
                 className="group relative bg-slate-950/50 hover:bg-slate-950/80 border border-slate-850 hover:border-purple-500/30 rounded-xl p-3.5 transition-all cursor-pointer flex gap-3.5"
               >
                 {/* Active left indicator line */}
@@ -431,7 +461,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                       <span>章節導覽 // INDEX</span>
                     </div>
                     <div className="space-y-1 max-h-[22vh] md:max-h-[28vh] overflow-y-auto scrollbar-thin pr-1">
-                      {getMarkdownHeadings(selectedLog.markdown).map((h, index) => {
+                      {getMarkdownHeadings(logMarkdownContent).map((h, index) => {
                         const isLevel1 = h.level === 1;
                         const isLevel2 = h.level === 2;
                         return (
@@ -515,69 +545,79 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               <div className="flex-1 overflow-y-auto px-6 py-6 md:p-8 bg-slate-950/20 scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-transparent">
                 {/* Embedded custom styling overrides for MD representation using native tags */}
                 <div className="markdown-body pr-1 font-sans">
-                  <Markdown
-                    components={{
-                      h1: ({ children }) => {
-                        const id = slugify(getChildrenText(children));
-                        return (
-                          <h1 id={id} className="text-xl md:text-2xl font-bold font-sans text-slate-100 border-b border-purple-500/10 pb-3 mb-5 mt-2 tracking-tight flex items-center gap-2 scroll-mt-6">
+                  {isLoadingLog ? (
+                    <div className="flex flex-col gap-4 animate-pulse py-8">
+                      <div className="h-8 bg-purple-950/20 border border-purple-500/10 rounded-lg w-3/4 py-4 mb-4"></div>
+                      <div className="h-4 bg-slate-800/60 rounded-lg w-1/2 mb-2"></div>
+                      <div className="h-3.5 bg-slate-800/40 rounded-lg w-full"></div>
+                      <div className="h-3.5 bg-slate-800/40 rounded-lg w-full"></div>
+                      <div className="h-3.5 bg-slate-800/40 rounded-lg w-5/6"></div>
+                    </div>
+                  ) : (
+                    <Markdown
+                      components={{
+                        h1: ({ children }) => {
+                          const id = slugify(getChildrenText(children));
+                          return (
+                            <h1 id={id} className="text-xl md:text-2xl font-bold font-sans text-slate-100 border-b border-purple-500/10 pb-3 mb-5 mt-2 tracking-tight flex items-center gap-2 scroll-mt-6">
+                              {children}
+                            </h1>
+                          );
+                        },
+                        h2: ({ children }) => {
+                          const id = slugify(getChildrenText(children));
+                          return (
+                            <h2 id={id} className="text-md md:text-lg font-bold font-sans text-purple-300 mt-6 mb-3 flex items-center gap-1.5 border-l-2 border-purple-500/40 pl-2.5 scroll-mt-6">
+                              {children}
+                            </h2>
+                          );
+                        },
+                        h3: ({ children }) => {
+                          const id = slugify(getChildrenText(children));
+                          return (
+                            <h3 id={id} className="text-sm font-semibold font-sans text-pink-300 mt-5 mb-2 pl-1 scroll-mt-6">
+                              {children}
+                            </h3>
+                          );
+                        },
+                        p: ({ children }) => (
+                          <p className="text-xs md:text-sm font-sans text-slate-300 leading-relaxed mb-4 text-justify font-light select-text">
                             {children}
-                          </h1>
-                        );
-                      },
-                      h2: ({ children }) => {
-                        const id = slugify(getChildrenText(children));
-                        return (
-                          <h2 id={id} className="text-md md:text-lg font-bold font-sans text-purple-300 mt-6 mb-3 flex items-center gap-1.5 border-l-2 border-purple-500/40 pl-2.5 scroll-mt-6">
+                          </p>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-4 border-purple-500 bg-purple-950/20 p-3.5 my-5 rounded-r-xl text-xs md:text-sm text-slate-200 leading-normal italic font-medium">
                             {children}
-                          </h2>
-                        );
-                      },
-                      h3: ({ children }) => {
-                        const id = slugify(getChildrenText(children));
-                        return (
-                          <h3 id={id} className="text-sm font-semibold font-sans text-pink-300 mt-5 mb-2 pl-1 scroll-mt-6">
+                          </blockquote>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
                             {children}
-                          </h3>
-                        );
-                      },
-                      p: ({ children }) => (
-                        <p className="text-xs md:text-sm font-sans text-slate-300 leading-relaxed mb-4 text-justify font-light select-text">
-                          {children}
-                        </p>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote className="border-l-4 border-purple-500 bg-purple-950/20 p-3.5 my-5 rounded-r-xl text-xs md:text-sm text-slate-200 leading-normal italic font-medium">
-                          {children}
-                        </blockquote>
-                      ),
-                      ul: ({ children }) => (
-                        <ul className="list-disc pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
-                          {children}
-                        </ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol className="list-decimal pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
-                          {children}
-                        </ol>
-                      ),
-                      li: ({ children }) => (
-                        <li className="text-slate-300 select-text">
-                          {children}
-                        </li>
-                      ),
-                      hr: () => (
-                        <hr className="border-slate-800/80 my-5 md:my-6" />
-                      ),
-                      code: ({ children }) => (
-                        <code className="bg-slate-950 border border-slate-800 text-purple-300 font-mono text-[10px] md:text-xs px-1.5 py-0.5 rounded-md mx-0.5">
-                          {children}
-                        </code>
-                      )
-                    }}
-                  >
-                    {selectedLog.markdown}
-                  </Markdown>
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="text-slate-300 select-text">
+                            {children}
+                          </li>
+                        ),
+                        hr: () => (
+                          <hr className="border-slate-800/80 my-5 md:my-6" />
+                        ),
+                        code: ({ children }) => (
+                          <code className="bg-slate-950 border border-slate-800 text-purple-300 font-mono text-[10px] md:text-xs px-1.5 py-0.5 rounded-md mx-0.5">
+                            {children}
+                          </code>
+                        )
+                      }}
+                    >
+                      {logMarkdownContent}
+                    </Markdown>
+                  )}
                 </div>
 
                 {/* Reading Complete / Action row */}
@@ -644,7 +684,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
                       <span>章節導覽 // INDEX</span>
                     </div>
                     <div className="space-y-1 max-h-[22vh] md:max-h-[28vh] overflow-y-auto scrollbar-thin pr-1">
-                      {getMarkdownHeadings(CAMPAIGN_RECRUITMENT_MD).map((h, index) => {
+                      {getMarkdownHeadings(recruitmentMarkdownContent).map((h, index) => {
                         const isLevel1 = h.level === 1;
                         const isLevel2 = h.level === 2;
                         return (
@@ -710,69 +750,79 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               <div className="flex-1 overflow-y-auto px-6 py-6 md:p-8 bg-slate-950/20 scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-transparent">
                 {/* Embedded custom styling overrides for MD representation using native tags */}
                 <div className="markdown-body pr-1 font-sans">
-                  <Markdown
-                    components={{
-                      h1: ({ children }) => {
-                        const id = `recruitment-${slugify(getChildrenText(children))}`;
-                        return (
-                          <h1 id={id} className="text-xl md:text-2xl font-bold font-sans text-slate-100 border-b border-purple-500/10 pb-3 mb-5 mt-2 tracking-tight flex items-center gap-2 scroll-mt-6">
+                  {isLoadingRecruitment ? (
+                    <div className="flex flex-col gap-4 animate-pulse py-8">
+                      <div className="h-8 bg-purple-950/20 border border-purple-500/10 rounded-lg w-3/4 py-4 mb-4"></div>
+                      <div className="h-4 bg-slate-800/60 rounded-lg w-1/2 mb-2"></div>
+                      <div className="h-3.5 bg-slate-800/40 rounded-lg w-full"></div>
+                      <div className="h-3.5 bg-slate-800/40 rounded-lg w-full"></div>
+                      <div className="h-3.5 bg-slate-800/40 rounded-lg w-5/6"></div>
+                    </div>
+                  ) : (
+                    <Markdown
+                      components={{
+                        h1: ({ children }) => {
+                          const id = `recruitment-${slugify(getChildrenText(children))}`;
+                          return (
+                            <h1 id={id} className="text-xl md:text-2xl font-bold font-sans text-slate-100 border-b border-purple-500/10 pb-3 mb-5 mt-2 tracking-tight flex items-center gap-2 scroll-mt-6">
+                              {children}
+                            </h1>
+                          );
+                        },
+                        h2: ({ children }) => {
+                          const id = `recruitment-${slugify(getChildrenText(children))}`;
+                          return (
+                            <h2 id={id} className="text-md md:text-lg font-bold font-sans text-purple-300 mt-6 mb-3 flex items-center gap-1.5 border-l-2 border-purple-500/40 pl-2.5 scroll-mt-6">
+                              {children}
+                            </h2>
+                          );
+                        },
+                        h3: ({ children }) => {
+                          const id = `recruitment-${slugify(getChildrenText(children))}`;
+                          return (
+                            <h3 id={id} className="text-sm font-semibold font-sans text-pink-300 mt-5 mb-2 pl-1 scroll-mt-6">
+                              {children}
+                            </h3>
+                          );
+                        },
+                        p: ({ children }) => (
+                          <p className="text-xs md:text-sm font-sans text-slate-300 leading-relaxed mb-4 text-justify font-light select-text">
                             {children}
-                          </h1>
-                        );
-                      },
-                      h2: ({ children }) => {
-                        const id = `recruitment-${slugify(getChildrenText(children))}`;
-                        return (
-                          <h2 id={id} className="text-md md:text-lg font-bold font-sans text-purple-300 mt-6 mb-3 flex items-center gap-1.5 border-l-2 border-purple-500/40 pl-2.5 scroll-mt-6">
+                          </p>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-4 border-purple-500 bg-purple-950/20 p-3.5 my-5 rounded-r-xl text-xs md:text-sm text-slate-200 leading-normal italic font-medium">
                             {children}
-                          </h2>
-                        );
-                      },
-                      h3: ({ children }) => {
-                        const id = `recruitment-${slugify(getChildrenText(children))}`;
-                        return (
-                          <h3 id={id} className="text-sm font-semibold font-sans text-pink-300 mt-5 mb-2 pl-1 scroll-mt-6">
+                          </blockquote>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
                             {children}
-                          </h3>
-                        );
-                      },
-                      p: ({ children }) => (
-                        <p className="text-xs md:text-sm font-sans text-slate-300 leading-relaxed mb-4 text-justify font-light select-text">
-                          {children}
-                        </p>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote className="border-l-4 border-purple-500 bg-purple-950/20 p-3.5 my-5 rounded-r-xl text-xs md:text-sm text-slate-200 leading-normal italic font-medium">
-                          {children}
-                        </blockquote>
-                      ),
-                      ul: ({ children }) => (
-                        <ul className="list-disc pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
-                          {children}
-                        </ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol className="list-decimal pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
-                          {children}
-                        </ol>
-                      ),
-                      li: ({ children }) => (
-                        <li className="text-slate-300 select-text">
-                          {children}
-                        </li>
-                      ),
-                      hr: () => (
-                        <hr className="border-slate-800/80 my-5 md:my-6" />
-                      ),
-                      code: ({ children }) => (
-                        <code className="bg-slate-950 border border-slate-800 text-purple-300 font-mono text-[10px] md:text-xs px-1.5 py-0.5 rounded-md mx-0.5">
-                          {children}
-                        </code>
-                      )
-                    }}
-                  >
-                    {CAMPAIGN_RECRUITMENT_MD}
-                  </Markdown>
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal pl-5 mb-5 space-y-2 text-xs md:text-sm text-slate-350">
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="text-slate-300 select-text">
+                            {children}
+                          </li>
+                        ),
+                        hr: () => (
+                          <hr className="border-slate-800/80 my-5 md:my-6" />
+                        ),
+                        code: ({ children }) => (
+                          <code className="bg-slate-950 border border-slate-800 text-purple-300 font-mono text-[10px] md:text-xs px-1.5 py-0.5 rounded-md mx-0.5">
+                            {children}
+                          </code>
+                        )
+                      }}
+                    >
+                      {recruitmentMarkdownContent}
+                    </Markdown>
+                  )}
                 </div>
 
                 {/* Footnotes / Action CTA */}
