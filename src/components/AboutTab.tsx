@@ -30,25 +30,78 @@ export default function AboutTab({ info }: AboutTabProps) {
   useEffect(() => {
     if (!info.steamUrl) return;
 
+    const steamUrl = info.steamUrl;
+    const idMatch = steamUrl.match(/\/id\/([^/]+)/);
+    const profilesMatch = steamUrl.match(/\/profiles\/([^/]+)/);
+
+    let profileXmlUrl = "";
+    let gamesXmlUrl = "";
+
+    if (idMatch) {
+      const username = idMatch[1].replace(/\/$/, "");
+      profileXmlUrl = `https://steamcommunity.com/id/${username}/?xml=1`;
+      gamesXmlUrl = `https://steamcommunity.com/id/${username}/games/?xml=1`;
+    } else if (profilesMatch) {
+      const profileId = profilesMatch[1].replace(/\/$/, "");
+      profileXmlUrl = `https://steamcommunity.com/profiles/${profileId}/?xml=1`;
+      gamesXmlUrl = `https://steamcommunity.com/profiles/${profileId}/games/?xml=1`;
+    } else {
+      setSteamData(prev => ({ ...prev, loading: false, error: true }));
+      return;
+    }
+
+    const proxyUrl = (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+
     setSteamData(prev => ({ ...prev, loading: true, error: false }));
-    fetch(`/api/steam?url=${encodeURIComponent(info.steamUrl)}`)
+
+    fetch(proxyUrl(profileXmlUrl))
       .then(res => {
-        if (!res.ok) throw new Error("Fetch failed");
+        if (!res.ok) throw new Error("Profile fetch failed");
         return res.json();
       })
-      .then(data => {
+      .then(async (profileData) => {
+        const profileXmlText = profileData.contents;
+        if (!profileXmlText) throw new Error("No profile content returned");
+
+        const memberSinceMatch = profileXmlText.match(/<memberSince>(.*?)<\/memberSince>/i);
+        const hoursPlayed2WeeksMatch = profileXmlText.match(/<hoursPlayed2Weeks>(.*?)<\/hoursPlayed2Weeks>/i);
+        const privacyStateMatch = profileXmlText.match(/<privacyState>(.*?)<\/privacyState>/i);
+
+        const memberSince = memberSinceMatch ? memberSinceMatch[1] : null;
+        const hoursPlayed2Weeks = hoursPlayed2WeeksMatch ? hoursPlayed2WeeksMatch[1] : null;
+        const privacyState = privacyStateMatch ? privacyStateMatch[1] : "public";
+
         let listYear = null;
-        if (data.memberSince) {
-          const yearMatch = data.memberSince.match(/\d{4}/);
+        if (memberSince) {
+          const yearMatch = memberSince.match(/\d{4}/);
           if (yearMatch) {
             listYear = yearMatch[0];
           }
         }
-        
+
+        let gameCount: number | null = null;
+        if (privacyState === "public") {
+          try {
+            const gamesRes = await fetch(proxyUrl(gamesXmlUrl));
+            if (gamesRes.ok) {
+              const gamesData = await gamesRes.json();
+              if (gamesData && gamesData.contents) {
+                const gamesXmlText = gamesData.contents;
+                const matches = gamesXmlText.match(/<game>/gi);
+                if (matches) {
+                  gameCount = matches.length;
+                }
+              }
+            }
+          } catch (err) {
+            console.error("Steam games count fetch failed:", err);
+          }
+        }
+
         setSteamData({
-          gameCount: data.gameCount,
+          gameCount,
           memberSinceYear: listYear,
-          hours2Weeks: data.hoursPlayed2Weeks,
+          hours2Weeks: hoursPlayed2Weeks,
           loading: false,
           error: false
         });
