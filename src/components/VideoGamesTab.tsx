@@ -11,6 +11,58 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
   const [copiedMc, setCopiedMc] = useState(false);
   const [copiedDiscord, setCopiedDiscord] = useState(false);
 
+  // Real-time Minecraft server status
+  const [serverStatus, setServerStatus] = useState<{
+    online: boolean;
+    players: { online: number; max: number } | null;
+    version: string | null;
+    loading: boolean;
+  }>({
+    online: false,
+    players: null,
+    version: null,
+    loading: true
+  });
+
+  useEffect(() => {
+    let active = true;
+    
+    const fetchStatus = () => {
+      // Use mcstatus.io v2 Java status API which has full CORS support
+      fetch(`https://api.mcstatus.io/v2/status/java/${info.minecraftIp}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to fetch Minecraft status");
+          return res.json();
+        })
+        .then(data => {
+          if (active) {
+            setServerStatus({
+              online: data.online,
+              players: data.players ? { online: data.players.online, max: data.players.max } : null,
+              version: data.version?.name_clean || null,
+              loading: false
+            });
+          }
+        })
+        .catch(err => {
+          console.error("Minecraft server query error:", err);
+          if (active) {
+            setServerStatus(prev => ({ ...prev, loading: false }));
+          }
+        });
+    };
+
+    fetchStatus();
+    
+    // Poll every 30 seconds to keep it fresh
+    const interval = setInterval(fetchStatus, 30000);
+    
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [info.minecraftIp]);
+
 
   const handleCopyMc = () => {
     navigator.clipboard.writeText(info.minecraftIp);
@@ -58,10 +110,22 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
             </div>
             
             {/* Status light */}
-            <div className="flex items-center gap-2 bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-500/30">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider font-semibold">Online</span>
-            </div>
+            {serverStatus.loading ? (
+              <div className="flex items-center gap-2 bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-500/30">
+                <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider font-semibold">Checking</span>
+              </div>
+            ) : serverStatus.online ? (
+              <div className="flex items-center gap-2 bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-500/30">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider font-semibold">Online</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-rose-950/40 px-2.5 py-1 rounded-full border border-rose-500/30">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider font-semibold">Offline</span>
+              </div>
+            )}
           </div>
 
           <p className="text-slate-300 text-sm leading-relaxed mb-6">
@@ -104,6 +168,36 @@ export default function VideoGamesTab({ info }: VideoGamesTabProps) {
                 )}
               </button>
             </div>
+
+            {/* Real-time Server Parameters */}
+            {!serverStatus.loading && (
+              <div className="mt-4 pt-3 border-t border-slate-900 text-[11px] font-mono">
+                {serverStatus.online && serverStatus.players ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <div>
+                      <span className="text-slate-500">當前人數:</span>{' '}
+                      <span className="text-blue-400 font-bold">
+                        {serverStatus.players.online} / {serverStatus.players.max}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">主機版本:</span>{' '}
+                      <span className="text-purple-400 font-semibold">
+                        {serverStatus.version || '1.20.1'}
+                      </span>
+                    </div>
+                    <div className="col-span-2 sm:col-span-1">
+                      <span className="text-slate-500">伺服狀態:</span>{' '}
+                      <span className="text-emerald-400 font-semibold">運行中</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-rose-400 font-semibold text-center py-0.5">
+                    ⚠️ 伺服器目前關閉中，請聯絡管理員開啟。
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Modpack directory card */}
