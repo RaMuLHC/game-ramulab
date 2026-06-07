@@ -88,11 +88,53 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
   const [shareLinkInfo, setShareLinkInfo] = useState<{ url: string; title: string } | null>(null);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
 
+  // Real-time FVTT status states
+  const [fvttStatus, setFvttStatus] = useState<{ online: boolean; loading: boolean }>({
+    online: false,
+    loading: true
+  });
+
   const handleCopyFvtt = () => {
     navigator.clipboard.writeText(info.fvttUrl);
     setCopiedFvtt(true);
     setTimeout(() => setCopiedFvtt(false), 2000);
   };
+
+  // Real-time FVTT server status check
+  React.useEffect(() => {
+    let active = true;
+    
+    const checkFvtt = () => {
+      // Ensure the URL is absolute
+      const urlToCheck = info.fvttUrl.startsWith('http://') || info.fvttUrl.startsWith('https://') 
+        ? info.fvttUrl 
+        : `https://${info.fvttUrl}`;
+
+      // Use mode: no-cors to check if server is reachable without triggering CORS block
+      fetch(urlToCheck, { mode: 'no-cors' })
+        .then(() => {
+          if (active) {
+            setFvttStatus({ online: true, loading: false });
+          }
+        })
+        .catch(err => {
+          console.warn("FVTT reachability check failed (offline or network error):", err);
+          if (active) {
+            setFvttStatus({ online: false, loading: false });
+          }
+        });
+    };
+
+    checkFvtt();
+    
+    // Poll every 30 seconds
+    const interval = setInterval(checkFvtt, 30000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [info.fvttUrl]);
 
   const handleSelectLog = (log: TtrpgLog) => {
     setSelectedLog(log);
@@ -217,10 +259,22 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               </div>
               
               {/* Table status indicator */}
-              <div className="flex items-center gap-2 bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-500/30">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-semibold">Active</span>
-              </div>
+              {fvttStatus.loading ? (
+                <div className="flex items-center gap-2 bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-500/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-semibold">Checking</span>
+                </div>
+              ) : fvttStatus.online ? (
+                <div className="flex items-center gap-2 bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-500/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest font-semibold">Active</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-rose-950/40 px-2.5 py-1 rounded-full border border-rose-500/30">
+                  <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                  <span className="text-[10px] font-mono text-rose-400 uppercase tracking-widest font-semibold">Offline</span>
+                </div>
+              )}
             </div>
 
             <p className="text-slate-350 text-xs leading-relaxed mb-5">
