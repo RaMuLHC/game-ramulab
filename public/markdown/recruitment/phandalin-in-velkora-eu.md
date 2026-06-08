@@ -17,7 +17,7 @@ emoji: ""
 ##  車卡要求 // Character Creation
 * **起始等級**: LV 3
 * **角色屬性**: 27 點購點法
-* **支援書籍**: PHB + Xanathar + Tasha (非官方擴充須經 DM 審核)
+* **支援書籍**: PHB + XGE + TCE (其他擴展須經 DM 審核)
 * **配置要素**: 請準備簡短的角色個人動機、背景故事。
 
 ##  故事背景 // Adventure Prelude
