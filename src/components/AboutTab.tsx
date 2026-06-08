@@ -95,15 +95,16 @@ export default function AboutTab({ info }: AboutTabProps) {
         let gameCount: number | null = null;
         if (privacyState === "public") {
           try {
-            const gamesRes = await fetch(proxyUrl(gamesXmlUrl));
+            const gamesRes = await fetch(proxyUrl(steamUrl));
             if (gamesRes.ok) {
-              const gamesXmlText = CLOUDFLARE_WORKER_PROXY 
+              const profileHtmlText = CLOUDFLARE_WORKER_PROXY 
                 ? await gamesRes.text() 
                 : (await gamesRes.json()).contents;
-              if (gamesXmlText) {
-                const matches = gamesXmlText.match(/<game>/gi);
-                if (matches) {
-                  gameCount = matches.length;
+              if (profileHtmlText) {
+                const gamesMatch = profileHtmlText.match(/href="[^"]*\/games\/?[^"]*"[\s\S]*?<span class="profile_count_link_total">([\s\S]*?)<\/span>/i);
+                if (gamesMatch) {
+                  const countStr = gamesMatch[1].trim().replace(/,/g, '');
+                  gameCount = parseInt(countStr, 10);
                 }
               }
             }
