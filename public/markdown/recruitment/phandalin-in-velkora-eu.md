@@ -1,7 +1,7 @@
 ---
 title: 危殼：凡達林之下 破碎方尖碑（歐區）
 ruleset: D&D 5e
-playerCount: 1/4
+playerCount: 2/4
 emoji: ""
 ---
 # 危殼：凡達林之下 破碎方尖碑
@@ -12,7 +12,7 @@ emoji: ""
 * **招募人數**: 4 - 5 玩家
 * **開團時間**: 週末1830 CET
 * **跑團平臺**: FVTT + Discord
-* **DM**：RaMu
+* **DM**：RaMu （Discord ID：ramu0）
 
 ##  車卡要求 // Character Creation
 * **起始等級**: LV 3

@@ -1,7 +1,7 @@
 ---
 title: 危殼：凡達林之下 破碎方尖碑（美區）
 ruleset: D&D 5e
-playerCount: 3/4
+playerCount: 已滿員 4/4
 emoji: ""
 ---
 # 危殼：凡達林之下 破碎方尖碑
