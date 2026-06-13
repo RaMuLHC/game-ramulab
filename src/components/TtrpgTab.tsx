@@ -594,7 +594,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-5xl bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.25)] flex flex-col md:flex-row h-[85vh] max-h-[750px] overflow-hidden z-10"
+              className="relative w-full max-w-7xl bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.25)] flex flex-col md:flex-row h-[92vh] max-h-[950px] overflow-hidden z-10"
             >
               {/* Sidebar: Meta specifications (full-width on mobile, md:width-72 on desktop) */}
               <div className="w-full md:w-72 bg-slate-950/60 border-b md:border-b-0 md:border-r border-slate-800/80 p-5 flex flex-col justify-between shrink-0 overflow-y-auto max-h-[35vh] md:max-h-full md:h-full">
@@ -768,7 +768,7 @@ export default function TtrpgTab({ info }: TtrpgTabProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{ type: "spring", damping: 25, stiffness: 350 }}
-              className="relative w-full max-w-5xl bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.25)] flex flex-col md:flex-row h-[85vh] max-h-[750px] overflow-hidden z-10"
+              className="relative w-full max-w-7xl bg-slate-900/95 border border-purple-500/30 rounded-2xl shadow-[0_0_50px_rgba(168,85,247,0.25)] flex flex-col md:flex-row h-[92vh] max-h-[950px] overflow-hidden z-10"
             >
               {/* Top Exit trigger (Close Button) on absolute corner */}
               <button
